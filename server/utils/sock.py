@@ -14,3 +14,7 @@ class Socket:
         self.server_socket.bind(('0.0.0.0', port))
         self.server_socket.listen(5)
         log.info(f'Listening on port {port}')
+        if threads:
+            self.listen_thread = threading.Thread(target=self.listen)
+            self.listen_thread.start()
+            log.info('Started listening thread')
