@@ -47,4 +47,19 @@ class Socket:
             else:
                 client_socket.send(response)
         self.close_connection(client_socket)
+
+    def close_connection(self, client_socket):
+        with self.lock:
+            try:
+                self.connections.remove(client_socket)
+            except ValueError:
+                pass
+        client_socket.close()
+    
+    def close(self):
+        with self.lock:
+            for client_socket in self.connections:
+                client_socket.close()
+            self.connections = []
+        self.server_socket.close()
     
