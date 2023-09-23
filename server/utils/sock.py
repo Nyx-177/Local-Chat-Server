@@ -1,6 +1,7 @@
 class Socket:
     def __init__(self, port, threads=True, handler=print, logging=True):
-        from .log import log
+        try: from .log import log
+        except ImportError: from log import log
         import threading
         import socket
 
@@ -20,12 +21,18 @@ class Socket:
             log.info('Started listening thread')
     
     def listen(self):
+        import threading
+
         while True:
             client_socket, addr = self.server_socket.accept()
             connection_thread = threading.Thread(target=self.handle_connection, args=(client_socket,))
             connection_thread.start()
 
     def handle_connection(self, client_socket):
+        import threading
+        try: from .log import log
+        except ImportError: from log import log
+
         with self.lock:
             self.connections.append(client_socket)
         
@@ -49,6 +56,8 @@ class Socket:
         self.close_connection(client_socket)
 
     def close_connection(self, client_socket):
+        import threading
+
         with self.lock:
             try:
                 self.connections.remove(client_socket)
@@ -57,9 +66,31 @@ class Socket:
         client_socket.close()
     
     def close(self):
+        import threading
+
         with self.lock:
             for client_socket in self.connections:
                 client_socket.close()
             self.connections = []
         self.server_socket.close()
-    
+
+if __name__ == '__main__':
+    try:
+        from .log import log
+    except ImportError:
+        from log import log
+
+    # Example usage:
+    def handle_data(client, data):
+        log.info(f'Received data: {data} from {client.getpeername()}')
+        if data == b'close\n':
+            return False
+        return data.upper()
+
+    log.info('Press enter to close the server at any time.')
+    my_socket = Socket(8080, handler=handle_data)
+
+
+    input()
+    my_socket.close()
+        
