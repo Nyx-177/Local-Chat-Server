@@ -24,7 +24,10 @@ class Socket:
         import threading
 
         while True:
-            client_socket, addr = self.server_socket.accept()
+            try:
+                client_socket, addr = self.server_socket.accept()
+            except OSError:
+                break
             connection_thread = threading.Thread(target=self.handle_connection, args=(client_socket,))
             connection_thread.start()
 
