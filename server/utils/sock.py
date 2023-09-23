@@ -24,4 +24,27 @@ class Socket:
             client_socket, addr = self.server_socket.accept()
             connection_thread = threading.Thread(target=self.handle_connection, args=(client_socket,))
             connection_thread.start()
+
+    def handle_connection(self, client_socket):
+        with self.lock:
+            self.connections.append(client_socket)
+        
+        client_info = client_socket.getpeername()
+        log.info(f'New connection from {client_info or "unknown"}')
+
+        while True:
+            try:
+                data = client_socket.recv(1024)
+            except OSError or ConnectionResetError:
+                log.info(f'Connection closed by client {client_info or "unknown"}.')
+                break
+            if not data:
+                log.warn(f'Connection closed by client {client_info or "unknown"} for unknown reason (likely force close).')
+                break
+            response = self.handler(client_socket, data)
+            if response is False:
+                self.close_connection(client_socket)
+            else:
+                client_socket.send(response)
+        self.close_connection(client_socket)
     
