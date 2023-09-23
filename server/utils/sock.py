@@ -18,3 +18,10 @@ class Socket:
             self.listen_thread = threading.Thread(target=self.listen)
             self.listen_thread.start()
             log.info('Started listening thread')
+    
+    def listen(self):
+        while True:
+            client_socket, addr = self.server_socket.accept()
+            connection_thread = threading.Thread(target=self.handle_connection, args=(client_socket,))
+            connection_thread.start()
+    
