@@ -19,7 +19,7 @@ def handle_data(client, data):
     return None
 
 log.info('Press enter to close the server at any time.')
-my_socket = Socket(8080, handler=handle_data, connection_handler=handle_connection)
+my_socket = Socket(14201, handler=handle_data, connection_handler=handle_connection)
 input()
 my_socket.close()
 log.error('Server closed.')
