@@ -1,4 +1,4 @@
-from utils import log, Socket, Rsa
+from utils import log, Socket
 import time
 
 def handle_disconnection(client_info):
