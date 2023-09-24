@@ -1,5 +1,5 @@
 class Socket:
-    def __init__(self, port, threads=True, handler=print, logging=True):
+    def __init__(self, port, threads=True, handler=print, connection_handler=print, logging=True):
         try: from .log import log
         except ImportError: from log import log
         import threading
@@ -7,8 +7,9 @@ class Socket:
 
         self.port = port
         self.handler = handler
+        self.connection_handler = connection_handler
 
-        self.connections = []
+        self.connections = {}
         self.lock = threading.Lock()
 
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -37,10 +38,17 @@ class Socket:
         except ImportError: from log import log
 
         with self.lock:
-            self.connections.append(client_socket)
+            self.connections[client_socket] = None
         
         client_info = client_socket.getpeername()
         log.info(f'New connection from {client_info or "unknown"}')
+
+        # send the response from the connection handler
+        response = self.connection_handler(client_socket)
+        if response is False:
+            self.close_connection(client_socket)
+        else:
+            client_socket.send(response)
 
         while True:
             try:
@@ -54,6 +62,8 @@ class Socket:
             response = self.handler(client_socket, data)
             if response is False:
                 self.close_connection(client_socket)
+            elif response is None:
+                pass
             else:
                 client_socket.send(response)
         self.close_connection(client_socket)
@@ -63,7 +73,7 @@ class Socket:
 
         with self.lock:
             try:
-                self.connections.remove(client_socket)
+                del self.connections[client_socket]
             except ValueError:
                 pass
         client_socket.close()
