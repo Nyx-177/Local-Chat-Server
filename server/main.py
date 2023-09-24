@@ -20,6 +20,17 @@ def handle_connection(client):
 def handle_data(client, data):
     global my_socket
     log.info(f'Received data: {data} from {client.getpeername()}')
+    if data == b'/help\n':
+        return b'/help - show this message\n/name - change your name\n'
+    elif data == b'/name\n':
+        client.send(b'Enter your new name: ')
+        name = client.recv(1024).decode().strip()
+        for connection in my_socket.connections:
+            if connection is not client:
+                connection.send(f'{my_socket.connections[client]} has changed their name to {name}.\n'.encode())
+        my_socket.connections[client] = name
+        return f'Your new name is {name}!\n'.encode()
+
     for connection in my_socket.connections:
         if connection is not client:
             connection.send(f'{my_socket.connections[client]}: {data.decode()}'.encode())

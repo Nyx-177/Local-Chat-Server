@@ -71,7 +71,6 @@ class Socket:
                 pass
             else:
                 client_socket.send(response)
-        self.disconnect_handler(client_info)
         self.close_connection(client_socket)
 
     def close_connection(self, client_socket):
