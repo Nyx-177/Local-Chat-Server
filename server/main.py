@@ -32,7 +32,8 @@ def handle_data(client, data):
             '/room <room_name> - changes your room to <room_name> or shows the current room if no argument is given',
             '/pm <name> <message> - sends a private message to <name> with the contents <message>',
             '/users - list all connected users',
-            '------------------'
+            '/rooms - list all rooms',
+            '------------------\n'
         ]
         return '\n'.join(help_lines).encode()
     elif b'/name' in data:
