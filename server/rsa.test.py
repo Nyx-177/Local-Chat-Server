@@ -1,8 +1,8 @@
 from utils import Rsa
 
 # Example usage
-public_key = open('public.pem', 'rb').read()
-private_key = open('private.pem', 'rb').read()
+public_key = open('server.public.pem', 'rb').read()
+private_key = open('server.private.pem', 'rb').read()
 
 rsa_instance = Rsa(publicKey=public_key, privateKey=private_key)
 
