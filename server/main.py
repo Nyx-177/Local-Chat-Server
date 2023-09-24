@@ -1,3 +1,14 @@
+
+
+
+
+
+
+
+
+
+# Example usage for the socket module: 
+'''
 import socket
 import threading
 
@@ -15,3 +26,4 @@ my_socket = Socket(8080, handler=handle_data)
 input()
 my_socket.close()
 log.error('Server closed.')
+'''
