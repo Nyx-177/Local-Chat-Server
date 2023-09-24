@@ -1,5 +1,4 @@
 from utils import log, Socket
-import time
 
 def handle_disconnection(client_info):
     global my_socket
