@@ -1,5 +1,5 @@
 class Socket:
-    def __init__(self, port, threads=True, handler=print, connection_handler=print, logging=True):
+    def __init__(self, port, threads=True, handler=print, connection_handler=print, disconnect_handler=print, logging=True):
         try: from .log import log
         except ImportError: from log import log
         import threading
@@ -8,6 +8,7 @@ class Socket:
         self.port = port
         self.handler = handler
         self.connection_handler = connection_handler
+        self.disconnect_handler = disconnect_handler
 
         self.connections = {}
         self.lock = threading.Lock()
@@ -46,7 +47,10 @@ class Socket:
         # send the response from the connection handler
         response = self.connection_handler(client_socket)
         if response is False:
+            self.disconnect_handler(client_info)
             self.close_connection(client_socket)
+        elif response is None:
+            pass
         else:
             client_socket.send(response)
 
@@ -57,6 +61,7 @@ class Socket:
                 log.info(f'Connection closed by client {client_info or "unknown"}.')
                 break
             if not data:
+                self.disconnect_handler(client_socket)
                 log.warn(f'Connection closed by client {client_info or "unknown"} for unknown reason (likely force close).')
                 break
             response = self.handler(client_socket, data)
@@ -66,6 +71,7 @@ class Socket:
                 pass
             else:
                 client_socket.send(response)
+        self.disconnect_handler(client_info)
         self.close_connection(client_socket)
 
     def close_connection(self, client_socket):
@@ -74,7 +80,7 @@ class Socket:
         with self.lock:
             try:
                 del self.connections[client_socket]
-            except ValueError:
+            except KeyError:
                 pass
         client_socket.close()
     
